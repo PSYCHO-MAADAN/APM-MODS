@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="user-scalable=no">
+    <title>SITE123 Player</title>
+    <!-- Bootstrap -->
+     <link rel="stylesheet" href="../files/css/bootstrap.min.css" type="text/css" >
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../files/font-awesome-4.7/css/font-awesome.min.css" type="text/css" >
+    <!-- Style  -->
+    <style>
+        .myPlayerBox {
+            width: 100%;
+            height: auto;
+            background-color: rgba(0,173,181,0.8);
+            border: 2px solid #00adb5;
+            display: flex;
+            flex-direction: column;
+                        flex-direction: column-reverse;
+                        border-radius: 16px;
+        }
+        .myPlayer {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          width: 100%;
+          height: 255px;
+          padding: 24px;
+          margin: 0;
+          overflow: hidden;
+          -webkit-user-select: none;
+          user-select: none;
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+          position: relative;
+        }
+        html {
+          width: 100%;
+          height: 100%;  
+          overflow: hidden;
+          padding: 0;
+          margin: 0;
+          outline: 0;
+        }
+        body {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+        /* Top Info */
+        #track {
+          width: 100%;
+          height: 48px; /* maximum 2 lines */
+          line-height: 24px;
+          overflow: hidden;
+          text-align: center;
+          font-size: 24px;
+          opacity: 0.9;
+          font-weight: 300;
+          color: #fff;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.33);
+        }
+        .timer-duration {
+          position: relative;
+          display: flex;
+          justify-content: space-between;
+        }
+        #timer,
+        #duration  {
+          font-size: 26px;
+          opacity: 0.9;
+          font-weight: 300;
+          color: #fff;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.33);
+        }
+        /* Controls */
+        .playerMiddleBtn {
+          display: flex;
+          align-items: center;
+          justify-self: center;
+          gap: 38px;
+          grid-column: 2;
+        }
+        html[dir="rtl"] .playerMiddleBtn {
+          flex-direction: row-reverse;
+        }
+        .controlsInner {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+        .playerBtn {
+          cursor: pointer;
+          opacity: 0.9;
+          -webkit-filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.33));
+          filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.33));
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        .playerBtn:hover {
+          opacity: 1;
+        }
+        #playBtn {
+            color: white;
+            font-size: 30px;
+        }
+        #pauseBtn {
+            color: white;
+            font-size: 30px;
+            display: none;
+        }
+        #prevBtn {
+            color: white;
+            font-size: 30px;
+        }
+        #nextBtn {
+            color: white;
+            font-size: 30px;
+        }
+        #playlistBtn {
+          color: white;
+          font-size: 30px;
+          grid-column: 1;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+        }
+        #volumeBtn {
+            color: white;
+            font-size: 30px;
+            grid-column: 3;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        /* Progress */
+        #waveform {
+          width: 100%;
+          height: 30%;
+          position: absolute;
+          left: 0;
+          top: 170px;
+          margin: -15% auto;
+          display: none;
+          cursor: pointer;
+          opacity: 0.8;
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        #waveform:hover {
+          opacity: 1;
+        }
+        #bar {
+          position: absolute;
+          top: 50%;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: rgba(255, 255, 255, 0.9);
+          box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.33);
+          opacity: 0.9;
+        }
+        #progress {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 0%;
+          height: 90%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: -1;
+        }
+        /* Loading */
+        #loading {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          margin: -35px;
+          width: 70px;
+          height: 70px;
+          background-color: #fff;
+          border-radius: 100%;  
+          -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+          animation: sk-scaleout 1.0s infinite ease-in-out;
+          display: none;
+        }
+        @-webkit-keyframes sk-scaleout {
+          0% { -webkit-transform: scale(0) }
+          100% {
+            -webkit-transform: scale(1.0);
+            opacity: 0;
+          }
+        }
+        @keyframes sk-scaleout {
+          0% { 
+            -webkit-transform: scale(0);
+            transform: scale(0);
+          } 100% {
+            -webkit-transform: scale(1.0);
+            transform: scale(1.0);
+            opacity: 0;
+          }
+        }
+        /* Plylist */
+        #playlist {
+          width: 100%;
+          max-height: calc(100vh - 220px);  /* full height minus `.myPlayer` height */
+          overflow-y: auto;
+          border-radius: 0 0 16px 16px;
+                    border-radius: 16px 16px 0 0;
+                  }
+        #list {
+          width: 100%;
+        }
+        .list-song {
+            width: 100%;
+            margin: 0;
+            padding: 24px;
+            height: auto;
+            background-color: #ededed;
+            display: flex;
+        }
+        .list-song:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+        .list-song:hover {
+            cursor: pointer;
+        }
+        html[dir="rtl"] .list-song {
+            direction: rtl;
+        }
+        .list-song .list-song-name {
+            width:100%;
+            font-size: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #4a5664;
+            text-transform: capitalize;
+            flex-grow: 1;
+        }
+        .list-song.active .list-song-name .fa-volume-up {
+            display: inline!important;
+        }
+        .list-song .list-song-info {
+            width:auto;
+            font-size: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #4a5664;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+        /* Volume */
+        #volume {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          touch-action: none;
+          -webkit-user-select: none;
+          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          display: none;
+        }
+        .bar {
+          position: absolute;
+          top: 50%;
+          left: 5%;
+          margin: -5px auto;
+          height: 10px;
+          background-color: rgba(255, 255, 255, 0.9);
+          box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.33);
+        }
+        #barEmpty {
+          width: 90%;
+          opacity: 0.5;
+          box-shadow: none;
+          cursor: pointer;
+        }
+        #barFull {
+          width: 90%;
+        }
+        #sliderBtn {
+          width: 50px;
+          height: 50px;
+          position: absolute;
+          top: 50%;
+          left: 93.25%;
+          margin: -25px auto;
+          background-color: rgba(255, 255, 255, 0.8);
+          box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.33);
+          border-radius: 25px;
+          cursor: pointer;
+        }
+        /* Fade-In */
+        .fadeout {
+          webkit-animation: fadeout 0.5s;
+          -ms-animation: fadeout 0.5s;
+          animation: fadeout 0.5s;
+        }
+        .fadein {
+          webkit-animation: fadein 0.5s;
+          -ms-animation: fadein 0.5s;
+          animation: fadein 0.5s;
+        }
+        @keyframes fadein {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @-webkit-keyframes fadein {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @-ms-keyframes fadein {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes fadeout {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        @-webkit-keyframes fadeout {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        @-ms-keyframes fadeout {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        /**
+         * Small Devices Only Fix
+         */
+        @media ( max-width: 380px ) {
+          #prevBtn {
+                left: 20px;
+            }
+            #nextBtn {
+                right: 20px;
+            }
+            #volumeBtn {
+                right: 60px;
+            }
+        }
+            </style>
+</head>
+<body>
+    <div class="myPlayerBox">
+        <div class="myPlayer">
+            <!-- Top Info -->
+            <div id="title">
+              <div id="track"></div>
+              <div class="timer-duration">
+                <div id="timer">0:00</div>
+                <div id="duration">0:00</div>
+              </div>
+            </div>
+            <!-- Controls -->
+            <div class="controlsOuter">
+              <div class="controlsInner">
+                <div id="loading"></div>
+                <div class="playerBtn hidden" id="playlistBtn"><i class="fa fa-list-ul"></i></div>
+                <div class="playerMiddleBtn"> 
+                  <div class="playerBtn" id="prevBtn"><i class="fa fa-step-backward"></i></div>
+                  <div class="playerBtn" id="playBtn"><i class="fa fa-play"></i></div>
+                  <div class="playerBtn" id="pauseBtn"><i class="fa fa-pause"></i></div>
+                  <div class="playerBtn" id="nextBtn"><i class="fa fa-step-forward"></i></div>
+                </div>
+                <div class="playerBtn" id="volumeBtn"><i class="fa fa-volume-up"></i></div>
+              </div>
+            </div>
+            <!-- Progress -->
+            <div id="waveform"></div>
+            <div id="bar"></div>
+            <div id="progress"></div>
+            <!-- Volume -->
+            <div id="volume" class="fadeout">
+              <div id="barFull" class="bar"></div>
+              <div id="barEmpty" class="bar"></div>
+              <div id="sliderBtn"></div>
+            </div>
+        </div>
+        <!-- Playlist -->
+        <div id="playlist">
+          <div id="list"></div>
+        </div>
+    </div>
+    <script src="../files/js/jquery.js" ></script>
+    <script src="../admin/InterfaceStatisFiles/allOther/howlerjs/dist/howler.core.min.js" ></script>
+    <script src="../admin/InterfaceStatisFiles/allOther/howlerjs/examples/player/siriwave.js" ></script>
+    <script>
+        /*!
+         *  Howler.js Audio Player Demo
+         *  howlerjs.com
+         *
+         *  (c) 2013-2017, James Simpson of GoldFire Studios
+         *  goldfirestudios.com
+         *
+         *  MIT License
+         */
+        var moduleID = '62f1d32053dfa';
+        if (moduleID!='') {
+            // Cache references to DOM elements.
+            var elms = ['track', 'timer', 'duration', 'playBtn', 'pauseBtn', 'prevBtn', 'nextBtn', 'playlistBtn', 'volumeBtn', 'progress', 'bar', 'wave', 'loading', 'playlist', 'list', 'volume', 'barEmpty', 'barFull', 'sliderBtn'];
+            elms.forEach(function(elm) {
+              window[elm] = document.getElementById(elm);
+            });
+            /**
+             * Player class containing the state of our playlist and where we are in it.
+             * Includes all methods for playing, skipping, updating the display, etc.
+             * @param {Array} playlist Array of objects with playlist song details ({title, file, howl}).
+             */
+            var Player = function(playlist) {
+              this.playlist = playlist;
+              this.index = 0;
+              // Display the title of the first track.
+              track.innerHTML = '1. ' + playlist[0].title;
+              // Setup the playlist display.
+              var songIndex = 1;
+              playlist.forEach(function(song) {
+                //The songs row
+                var div = document.createElement('div');
+                div.className = 'list-song song-num-'+songIndex+'';
+                list.appendChild(div);
+                //The song name and number
+                var divSongName = document.createElement('div');
+                divSongName.className = 'list-song-name';
+                divSongName.innerHTML = songIndex+'. '+song.title+' <i class="fa fa-volume-up" style="display:none;"></i>';
+                divSongName.onclick = function() {
+                    player.skipTo(playlist.indexOf(song));
+                };
+                div.appendChild(divSongName);
+                //The song info
+                if (song.pageUrl!='' || song.cartUrl!='') {
+                    var divSongInfo = document.createElement('div');
+                    divSongInfo.className = 'list-song-info';
+                    var x = '';
+                    if (song.pageUrl!='') {
+                        x += '<a href="'+song.pageUrl+'" target="_parent"><i class="fa fa-info"></i> <span class="hidden-xs">Info</span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                    }
+                    if (song.cartUrl!='') {
+                        x += '<a href="'+song.cartUrl+'" target="_blank"><i class="fa fa-cart-plus"></i> <span class="hidden-xs">Buy</span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                    }
+                    divSongInfo.innerHTML = x;
+                    div.onclick = function() {
+                    };
+                    div.appendChild(divSongInfo);
+                }
+                songIndex++;
+              });
+            };
+            Player.prototype = {
+              /**
+               * Play a song in the playlist.
+               * @param  {Number} index Index of the song in the playlist (leave empty to play the first or current).
+               */
+              play: function(index) {
+                var self = this;
+                var sound;
+                index = typeof index === 'number' ? index : self.index;
+                var data = self.playlist[index];
+                //We make sure to active the song that played in the playlist
+                $('.list-song.active').removeClass('active');
+                $('.list-song.song-num-'+(index+1)+'').addClass('active');
+                // If we already loaded this track, use the current one.
+                // Otherwise, setup and load a new Howl.
+                if (data.howl) {
+                  sound = data.howl;
+                } else {
+                  sound = data.howl = new Howl({
+                    //src: ['./audio/' + data.file + '.webm', './audio/' + data.file + '.mp3'],
+                    src: [data.file],
+                    html5: true, // Force to HTML5 so that the audio can stream in (best for large files).
+                    onplay: function() {
+                      // Display the duration.
+                      duration.innerHTML = self.formatTime(Math.round(sound.duration()));
+                      // Start upating the progress of the track.
+                      requestAnimationFrame(self.step.bind(self));
+                      // Start the wave animation if we have already loaded
+                      wave.container.style.display = 'block';
+                      bar.style.display = 'none';
+                      pauseBtn.style.display = 'block';
+                    },
+                    onload: function() {
+                      // Start the wave animation.
+                      wave.container.style.display = 'block';
+                      bar.style.display = 'none';
+                      loading.style.display = 'none';
+                    },
+                    onend: function() {
+                      // Stop the wave animation.
+                      wave.container.style.display = 'none';
+                      bar.style.display = 'block';
+                      self.skip('right');
+                    },
+                    onpause: function() {
+                      // Stop the wave animation.
+                      wave.container.style.display = 'none';
+                      bar.style.display = 'block';
+                    },
+                    onstop: function() {
+                      // Stop the wave animation.
+                      wave.container.style.display = 'none';
+                      bar.style.display = 'block';
+                    }
+                  });
+                }
+                // Begin playing the sound.
+                sound.play();
+                // Update the track display.
+                track.innerHTML = (index + 1) + '. ' + data.title;
+                // Show the pause button.
+                if (sound.state() === 'loaded') {
+                  playBtn.style.display = 'none';
+                  pauseBtn.style.display = 'block';
+                } else {
+                  loading.style.display = 'block';
+                  playBtn.style.display = 'none';
+                  pauseBtn.style.display = 'none';
+                }
+                // Keep track of the index we are currently playing.
+                self.index = index;
+              },
+              /**
+               * Pause the currently playing track.
+               */
+              pause: function() {
+                var self = this;
+                // Get the Howl we want to manipulate.
+                var sound = self.playlist[self.index].howl;
+                // Puase the sound.
+                sound.pause();
+                // Show the play button.
+                playBtn.style.display = 'block';
+                pauseBtn.style.display = 'none';
+              },
+              /**
+               * Skip to the next or previous track.
+               * @param  {String} direction 'next' or 'prev'.
+               */
+              skip: function(direction) {
+                var self = this;
+                // Get the next track based on the direction of the track.
+                var index = 0;
+                if (direction === 'prev') {
+                  index = self.index - 1;
+                  if (index < 0) {
+                    index = self.playlist.length - 1;
+                  }
+                } else {
+                  index = self.index + 1;
+                  if (index >= self.playlist.length) {
+                    index = 0;
+                  }
+                }
+                self.skipTo(index);
+              },
+              /**
+               * Skip to a specific track based on its playlist index.
+               * @param  {Number} index Index in the playlist.
+               */
+              skipTo: function(index) {
+                var self = this;
+                // Stop the current track.
+                if (self.playlist[self.index].howl) {
+                  self.playlist[self.index].howl.stop();
+                }
+                // Reset progress.
+                progress.style.width = '0%';
+                // Play the new track.
+                self.play(index);
+              },
+              /**
+               * Set the volume and update the volume slider display.
+               * @param  {Number} val Volume between 0 and 1.
+               */
+              volume: function(val) {
+                var self = this;
+                // Update the global volume (affecting all Howls).
+                Howler.volume(val);
+                // Update the display on the slider.
+                var barWidth = (val * 90) / 100;
+                barFull.style.width = (barWidth * 100) + '%';
+                sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
+              },
+              /**
+               * Seek to a new position in the currently playing track.
+               * @param  {Number} per Percentage through the song to skip.
+               */
+              seek: function(per) {
+                var self = this;
+                // Get the Howl we want to manipulate.
+                var sound = self.playlist[self.index].howl;
+                // Convert the percent into a seek position.
+                if (sound.playing()) {
+                  sound.seek(sound.duration() * per);
+                }
+              },
+              /**
+               * The step called within requestAnimationFrame to update the playback position.
+               */
+              step: function() {
+                var self = this;
+                // Get the Howl we want to manipulate.
+                var sound = self.playlist[self.index].howl;
+                // Determine our current seek position.
+                var seek = sound.seek() || 0;
+                timer.innerHTML = self.formatTime(Math.round(seek));
+                progress.style.width = (((seek / sound.duration()) * 100) || 0) + '%';
+                // If the sound is still playing, continue stepping.
+                if (sound.playing()) {
+                  requestAnimationFrame(self.step.bind(self));
+                }
+              },
+              /**
+               * Toggle the playlist display on/off.
+               */
+              togglePlaylist: function() {
+                //var self = this;
+                //var display = (playlist.style.display === 'block') ? 'none' : 'block';
+                //setTimeout(function() {
+                  //playlist.style.display = display;
+                //}, (display === 'block') ? 0 : 500);
+                //playlist.className = (display === 'block') ? 'fadein' : 'fadeout';
+              },
+              /**
+               * Toggle the volume display on/off.
+               */
+              toggleVolume: function() {
+                var self = this;
+                var display = (volume.style.display === 'block') ? 'none' : 'block';
+                setTimeout(function() {
+                  volume.style.display = display;
+                }, (display === 'block') ? 0 : 500);
+                volume.className = (display === 'block') ? 'fadein' : 'fadeout';
+              },
+              /**
+               * Format the time from seconds to M:SS.
+               * @param  {Number} secs Seconds to format.
+               * @return {String}      Formatted time.
+               */
+              formatTime: function(secs) {
+                var minutes = Math.floor(secs / 60) || 0;
+                var seconds = (secs - minutes * 60) || 0;
+                return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+              }
+            };
+            //Get the songs list
+            var songsList = $(parent.document).find('#music-player-songs-'+moduleID).val();
+            var songsList = jQuery.parseJSON( songsList );
+            var userPlayer = new Array();
+            $(songsList.songs).each(function (index, value) {
+                var song = $(this)[0];
+                userPlayer.push({
+                    'title': song.title,
+                    'file': song.file,
+                    'howl': song.howl,
+                    'pageUrl': song.pageUrl,
+                    'cartUrl': song.cartUrl
+                });
+            });
+            // Setup our new audio player class and pass it the playlist.
+            var player = new Player(userPlayer);
+            // Bind our player controls.
+            playBtn.addEventListener('click', function() {
+              player.play();
+            });
+            pauseBtn.addEventListener('click', function() {
+              player.pause();
+            });
+            prevBtn.addEventListener('click', function() {
+              player.skip('prev');
+            });
+            nextBtn.addEventListener('click', function() {
+              player.skip('next');
+            });
+            waveform.addEventListener('click', function(event) {
+              player.seek(event.clientX / window.innerWidth);
+            });
+            playlistBtn.addEventListener('click', function() {
+              player.togglePlaylist();
+            });
+            playlist.addEventListener('click', function() {
+              player.togglePlaylist();
+            });
+            volumeBtn.addEventListener('click', function() {
+              player.toggleVolume();
+            });
+            volume.addEventListener('click', function() {
+              player.toggleVolume();
+            });
+            // Setup the event listeners to enable dragging of volume slider.
+            barEmpty.addEventListener('click', function(event) {
+              var per = event.layerX / parseFloat(barEmpty.scrollWidth);
+              player.volume(per);
+            });
+            sliderBtn.addEventListener('mousedown', function() {
+              window.sliderDown = true;
+            });
+            sliderBtn.addEventListener('touchstart', function() {
+              window.sliderDown = true;
+            });
+            volume.addEventListener('mouseup', function() {
+              window.sliderDown = false;
+            });
+            volume.addEventListener('touchend', function() {
+              window.sliderDown = false;
+            });
+            var move = function(event) {
+              if (window.sliderDown) {
+                var x = event.clientX || event.touches[0].clientX;
+                var startX = window.innerWidth * 0.05;
+                var layerX = x - startX;
+                var per = Math.min(1, Math.max(0, layerX / parseFloat(barEmpty.scrollWidth)));
+                player.volume(per);
+              }
+            };
+            volume.addEventListener('mousemove', move);
+            volume.addEventListener('touchmove', move);
+            // Setup the "waveform" animation.
+            var wave = new SiriWave({
+                container: waveform,
+                width: window.innerWidth,
+                height: window.innerHeight * 0.3,
+                cover: true,
+                speed: 0.03,
+                amplitude: 0.7,
+                frequency: 2
+            });
+            wave.start();
+            // Update the height of the wave animation.
+            // These are basically some hacks to get SiriWave.js to do what we want.
+            var resize = function() {
+              var height = window.innerHeight * 0.3;
+              var width = window.innerWidth;
+              wave.height = height;
+              wave.height_2 = height / 2;
+              wave.MAX = wave.height_2 - 4;
+              wave.width = width;
+              wave.width_2 = width / 2;
+              wave.width_4 = width / 4;
+              wave.canvas.height = height;
+              wave.canvas.width = width;
+              wave.container.style.margin = -(height / 2) + 'px auto';
+              // Update the position of the slider.
+              var sound = player.playlist[player.index].howl;
+              if (sound) {
+                var vol = sound.volume();
+                var barWidth = (vol * 0.9);
+                sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
+              }
+            };
+            window.addEventListener('resize', resize);
+            resize();
+            // Run when the page load (before images and other resource)
+            jQuery(function($) {
+              /**
+               * Wizard Main Color Handler - The music player main color wasn't changing on
+               * live, if the user change the website main color form the wizard.
+               */
+              if ( topWindow.Wizard ) {
+                $('.myPlayerBox').css({
+                  backgroundColor: topWindow.$('#global_main_color').val(),
+                  border: '1px solid ' + topWindow.$('#global_main_color').val()
+                });
+              }
+              // Add page direction related to the parent
+              if ( $(parent.document).find('html').attr('dir') === 'rtl' ) {
+                $('html').attr('dir','rtl');
+              }
+              /**
+               * Bug-fix - In some cases the player IFrame is not visible, its happen
+               * when we display the player inside the wizard preview and on its own 
+               * page (not homepage), reloading the page time after time reproducing it. 
+               * we don't found a solution at this time so we add this fix. 
+               */
+              setTimeout(function(){
+                $(parent.document).find('#music-player-'+moduleID).css({
+                  display: 'inline-block'
+                });
+              },100);
+            });
+        }
+        /**
+       * Get the closest top parent of the window
+       */
+      var topWindow = function() {
+        // get objects
+        var win = window;
+        var top = win;
+        // loop to the top window (win.parent is equal to window on the top frame)
+        while ( win.parent != win ) {
+          try {
+            // will throw when the parent window is from a different domain
+            win.parent.document;
+            top = win.parent;
+          } catch (e) {}
+          // get the parent window
+          win = win.parent;
+        }
+        // return the top window that on the same domain
+        return top;
+      }();
+    </script>
+</body>
+</html>

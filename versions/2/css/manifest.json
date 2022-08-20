@@ -1,0 +1,9 @@
+{
+	"name": "apmodz",
+	"short_name": "apmodz",
+	"theme_color": "#00adb5",
+	"background_color": "#000000",
+	"display": "standalone",
+	"Scope": "https://62f1d169c6fd8.site123.me/",
+	"start_url": "https://62f1d169c6fd8.site123.me/",
+	"icons": [{"src":"https://cdn-cms-s.f-static.net/ready_uploads/pwaScreenLogo/pwaImage.png?width=192&height=192&resizeType=pwaIcon&w=&orderScreen=&websiteID=6629962&tranW=&v=css_r156_34958860","sizes":"192x192","type":"image/png"},{"src":"https://cdn-cms-s.f-static.net/ready_uploads/pwaScreenLogo/pwaImage.png?width=512&height=512&resizeType=pwaIcon&w=&orderScreen=&websiteID=6629962&tranW=&v=css_r156_34958860","sizes":"512x512","type":"image/png"}]}
